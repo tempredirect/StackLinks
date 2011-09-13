@@ -4,12 +4,6 @@
   (:use [stacklinks.files :only (open-gzip-file)] )
 )
 
-
-(defn- attrs
-  [coll]
-
-  )
-
 (defn load-posts
   "Parse an input source into a stream of post elements"
   [source]
