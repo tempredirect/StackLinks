@@ -56,7 +56,6 @@
         (do
           (println-err "Processing :" input);;" count : " (count all-posts)
           (with-open [f (open-gzip-file input)
-
                       w (writer-for-input out input)]
             (doseq [post (filtered-post-links (load-posts f))]
               ; for each item write it to the output
