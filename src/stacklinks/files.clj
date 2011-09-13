@@ -1,5 +1,5 @@
 (ns stacklinks.files
-  (:use [clojure.java.io :only (file)]))
+  (:use [clojure.java.io :only (file input-stream)]))
 
 (import (java.io File)
         (java.io OutputStreamWriter)
@@ -31,7 +31,7 @@
 
 (defn open-gzip-file
   [name]
-  (let [fileinput (FileInputStream. name)]
+  (let [fileinput (input-stream name)]
     (if (= (extension name) "gz")
       (GZIPInputStream. fileinput)
       fileinput)))

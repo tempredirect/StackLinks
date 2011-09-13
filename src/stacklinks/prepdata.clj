@@ -22,16 +22,14 @@
   )
 
 (defn writer-for-input
-  [out input idx]
+  [out input]
   (if out
-    (writer (file out (str (minus-extension (file-name input)) "." (format "%05d" idx))))
+    (writer (file out (minus-extension (file-name input))))
     *out*))
 
 (defn filtered-post-links
-  [input]
-  (filter #(not-empty (second %))
-    (map #(list (% :Id) (extract-links (% :Body)))
-      (posts input))))
+  [coll]
+  (filter #(not-empty (second %)) (map post-id-and-links coll)))
 
 (defn to-post-chunks
   [all-posts partition-count]
@@ -50,25 +48,21 @@
   (with-command-line args
     "Command line usage"
     [[out "output directory"]
-     [partition-count "number of posts per partition"]
      [clean-out? "clean output directory"]
      inputs]
     (if clean-out? (clean-directory out))
     (doseq [input inputs]
       (if (.exists (file input))
-        (let [all-posts (filtered-post-links (open-gzip-file input))]
+        (do
           (println-err "Processing :" input);;" count : " (count all-posts)
-          (loop [post-chunks (to-post-chunks all-posts partition-count)
-                 idx 0]
-            (if (not-empty post-chunks)
-              (do
-                (with-open [w (writer-for-input out input idx)]
-                  (output-chunk-to-writer (first post-chunks) w))
-                (recur (rest post-chunks)
-                  (inc idx)))
-              )
-            )
+          (with-open [f (open-gzip-file input)
+
+                      w (writer-for-input out input)]
+            (doseq [post (filtered-post-links (load-posts f))]
+              ; for each item write it to the output
+              (println-to w post)))
           (println-err "Finished :" input))
+
         (println-err "File not found : " input)))
     (System/exit 0)))
 

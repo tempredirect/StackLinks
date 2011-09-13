@@ -1,17 +1,19 @@
 (ns stacklinks.posts
   (:require clojure.contrib.lazy-xml clojure.string)
   (:use clojure.contrib.command-line clojure.java.io)
+  (:use [stacklinks.files :only (open-gzip-file)] )
 )
 
 
 (defn- attrs
   [coll]
-  (map #(% :attrs) coll)
+
   )
 
-(defn posts
+(defn load-posts
+  "Parse an input source into a stream of post elements"
   [source]
-  (attrs
+  (map #(% :attrs)
     (filter
       #(and (= (% :name) :row)
             (= (% :type) :start-element))
@@ -25,3 +27,9 @@
 (defn- post-links
   [post-attrs]
     (extract-links (post-attrs :Body)) post-attrs)
+
+(defn post-id-and-links
+  "returns a list the post id and all links that follow : (id & links)"
+  [post]
+  (list (post :Id) (extract-links (post :Body))))
+
