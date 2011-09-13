@@ -31,16 +31,17 @@
   [coll]
   (filter #(not-empty (second %)) (map post-id-and-links coll)))
 
-(defn to-post-chunks
-  [all-posts partition-count]
-  (if partition-count
-    (partition-all (Integer. partition-count) all-posts)
-    (list all-posts)))
-
-(defn output-chunk-to-writer
-  [chuck w]
-    (doseq [post chuck]
-      (println-to w post))
+(defn process-file
+  "Process a file and output to out"
+  [fname out]
+  (do
+    (println-err "Processing :" fname);;" count : " (count all-posts)
+    (with-open [f (open-gzip-file fname)
+                w (writer-for-input out fname)]
+      (doseq [post (filtered-post-links (load-posts f))]
+        ; for each item write it to the output
+        (println-to w post)))
+    (println-err "Finished :" fname))
   )
 
 (defn -main
@@ -51,18 +52,10 @@
      [clean-out? "clean output directory"]
      inputs]
     (if clean-out? (clean-directory out))
-    (doseq [input inputs]
-      (if (.exists (file input))
-        (do
-          (println-err "Processing :" input);;" count : " (count all-posts)
-          (with-open [f (open-gzip-file input)
-                      w (writer-for-input out input)]
-            (doseq [post (filtered-post-links (load-posts f))]
-              ; for each item write it to the output
-              (println-to w post)))
-          (println-err "Finished :" input))
-
-        (println-err "File not found : " input)))
+    (doseq [fname inputs]
+      (if (file-exists? fname)
+        (process-file fname out)
+        (println-err "File not found : " fname)))
     (System/exit 0)))
 
 (if *command-line-args*

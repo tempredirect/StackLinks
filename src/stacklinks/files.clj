@@ -15,6 +15,10 @@
   [name]
   (.getName (File. name)))
 
+(defn file-exists? [fname]
+  "returns true if the fname represents a file"
+  (.exists (file fname)))
+
 (defn minus-extension
   [name]
   (let [idx (.lastIndexOf name ".")]
@@ -30,6 +34,7 @@
       "")))
 
 (defn open-gzip-file
+  ""
   [name]
   (let [fileinput (input-stream name)]
     (if (= (extension name) "gz")
