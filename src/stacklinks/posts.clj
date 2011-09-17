@@ -7,6 +7,9 @@
 (defn load-posts
   "Parse an input source into a stream of post elements"
   [source]
+  ; Id="3" PostTypeId="2" ParentId="1" CreationDate="2010-09-01T19:36:50.053" Score="26" ViewCount="0" Body=""
+  ; OwnerUserId="11" LastEditorUserId="11" LastEditorDisplayName="" LastEditDate="2010-09-01T20:41:14.273"
+  ; LastActivityDate="2010-09-01T20:41:14.273" CommentCount="16"
   (map #(% :attrs)
     (filter
       #(and (= (% :name) :row)
@@ -26,4 +29,11 @@
   "returns a list the post id and all links that follow : (id & links)"
   [post]
   (list (post :Id) (extract-links (post :Body))))
+
+(defn post-lite-and-links
+  "returns a list the post id and all links that follow : (id & links)"
+  [post]
+  (assoc (select-keys post [:Id :PostTypeId :ParentId])
+          :Links (extract-links (post :Body))))
+
 
